@@ -193,58 +193,58 @@ gt::gt_output("summary")
 
 
 
-## 
+<!-- ##  -->
 
-```{r}
-#| panel: input
-#| layout-ncol: 2
+<!-- ```{r} -->
+<!-- #| panel: input -->
+<!-- #| layout-ncol: 2 -->
 
-inputPanel(
-  sliderInput("min_petal_width", 
-            "Select the smallest Petal Width to appear in the data.",
-            min = .09, max = 2.6, step = .01, value = .09),
-checkboxInput("show_color","Color Plot By Species?", value = FALSE)
-)
-```
+<!-- inputPanel( -->
+<!--   sliderInput("min_petal_width",  -->
+<!--             "Select the smallest Petal Width to appear in the data.", -->
+<!--             min = .09, max = 2.6, step = .01, value = .09), -->
+<!-- checkboxInput("show_color","Color Plot By Species?", value = FALSE) -->
+<!-- ) -->
+<!-- ``` -->
 
-:::: panel-tabset
+<!-- :::: panel-tabset -->
 
-## Plot
+<!-- ## Plot -->
 
-```{r}
-#| panel: fill
-#| 
-plotOutput("scatterplot")
+<!-- ```{r} -->
+<!-- #| panel: fill -->
+<!-- #|  -->
+<!-- plotOutput("scatterplot") -->
 
-```
+<!-- ``` -->
 
 
-## table
-```{r}
-tableOutput("my_summaries")
-```
+<!-- ## table -->
+<!-- ```{r} -->
+<!-- tableOutput("my_summaries") -->
+<!-- ``` -->
 
-::::
+<!-- :::: -->
 
-```{r}
-#| context: server
+<!-- ```{r} -->
+<!-- #| context: server -->
 
-df <- reactiveValues(data = iris)
-  
-observeEvent(input$min_petal_width, {
-  df$data <- iris %>% filter(Petal.Width > input$min_petal_width)
-})
+<!-- df <- reactiveValues(data = iris) -->
 
-# placeholder plot
-output$scatterplot <- renderPlot(
-  create_plot(df$data, input$show_color)
-)
+<!-- observeEvent(input$min_petal_width, { -->
+<!--   df$data <- iris %>% filter(Petal.Width > input$min_petal_width) -->
+<!-- }) -->
 
-# placehold table
-output$my_summaries <- function(){
-  create_table(df$data)
-}
-```
+<!-- # placeholder plot -->
+<!-- output$scatterplot <- renderPlot( -->
+<!--   create_plot(df$data, input$show_color) -->
+<!-- ) -->
+
+<!-- # placehold table -->
+<!-- output$my_summaries <- function(){ -->
+<!--   create_table(df$data) -->
+<!-- } -->
+<!-- ``` -->
 
 
 
