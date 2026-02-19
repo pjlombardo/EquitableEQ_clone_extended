@@ -1,0 +1,256 @@
+---
+title: "Equitable Equations Clone Example"
+author: "Equitable Equations (more or less...)"
+server: shiny
+format: 
+  revealjs:
+    footer: "Presentation name, author"
+    logo: images/ECLogo.png
+    transition: slide
+    background-image: images/watercolor_bg.jpg
+    background-opacity: 0.1
+    title-slide-attributes: 
+      data-background-image: images/watercolor_bg.jpg
+      data-background-opacity: "0.5"
+---
+
+```{r}
+#| label: setup
+#| echo: false
+#| warning: false
+#| message: false
+
+library(tidyverse)
+library(broom)
+library(DT)
+library(shiny)
+library(plotly)
+library(gt)
+library(kableExtra)
+
+source('functions.R')
+```
+
+
+## Opening side 
+Here we go:
+
+::: {.incremental}
+
+* bulleted list
+* item 2
+* item 3
+
+:::
+
+
+## Columns
+
+::::: {.columns }
+
+:::{.column width="30%" .fragment}
+```{r}
+iris %>%
+  select(Species, Sepal.Width) %>%
+  head(10) %>%
+  gt() %>%
+  tab_header(
+    title = "Sepal Widths by Species",
+    subtitle = "Iris Flowers"
+  ) %>%
+  cols_align(c("center"),columns = "Sepal.Width") %>%
+  fmt_number(columns = "Sepal.Width",
+             decimals = 3) %>%
+  tab_options(
+    table.border.top.width = px(5),      # Thick top border
+    table.border.bottom.width = px(5),   # Thick bottom border
+    table.border.left.width = px(5),     # Thick left border
+    table.border.right.width = px(5),    # Thick right border
+    table.border.top.style = "solid",    # Ensure style is solid
+    table.border.bottom.style = "solid",
+    table.border.left.style = "solid",
+    table.border.right.style = "solid",
+    table.border.top.color = "black",    # Ensure color is black
+    table.border.bottom.color = "black",
+    table.border.left.color = "black",
+    table.border.right.color = "black"
+  )
+```
+
+
+:::
+
+:::{.column width="70%" .fragment}
+
+```{r}
+#| fig-height: 7
+ggplot(data = iris,
+       aes(x = Species, y = Sepal.Width)) + 
+  geom_boxplot(fill = "coral", alpha = .3) +
+  theme_bw()
+```
+
+:::
+
+:::::
+
+## Code highlighting
+```{r}
+#| echo: true
+#| fig-show: hide
+#| code-line-numbers: "|1|2|1-2|3|4|"
+
+ggplot(data = iris,
+       aes(x = Species, y = Sepal.Width)) + 
+  geom_boxplot(fill = "coral", alpha = .3) +
+  theme_bw()
+```
+
+
+## What are these measurements? {.nostretch}
+
+. . .
+
+![Image 1: Irises.](images/irises.png){fig-align=center width=80%}
+
+## Simpson's Paradox
+```{r}
+#| panel: input
+
+varSelectInput("x_var", "Select an independent variable:",
+               data = iris %>% select(-c(Species)),
+               selected = "Sepal.Width")
+
+varSelectInput("y_var", "Select an dependent variable:",
+               data = iris %>% select(-c(Species)),
+               selected = "Petal.Width")
+
+checkboxInput("show_color","Show color:", value = FALSE)
+
+```
+
+
+```{r}
+#| panel: fill
+
+plotOutput("scatter", height = "500px")
+```
+
+
+```{r}
+#| context: server
+
+output$scatter <- renderPlot({
+  x_label <- sub("\\."," ",input$x_var)
+  y_label <- sub("\\."," ",input$y_var)
+  if (input$show_color){
+    ggplot(data = iris,
+        aes(x = get(input$x_var), y = get(input$y_var),
+           color = Species))+
+        geom_point()+
+        geom_smooth(method = 'lm', formula = 'y~x', se =F) + 
+        labs(x = x_label, 
+             y = y_label)+
+        theme_bw()
+  } else {
+    ggplot(data = iris,
+        aes(x = get(input$x_var), y = get(input$y_var)))+
+        geom_point()+
+        geom_smooth(method = 'lm', formula = 'y~x', se =F, color = 'gray') + 
+        labs(x = x_label, 
+             y = y_label)+
+        theme_bw()
+  }
+  
+})
+
+output$summary <- gt::render_gt({
+  make_table(input$x_var2, input$y_var2)
+})
+
+```
+
+
+## Simpson's Paradox, Summary Table
+
+```{r}
+#| panel: input
+
+varSelectInput("x_var2", "Select an independent variable:",
+               data = iris %>% select(-c(Species)),
+               selected = "Sepal.Width")
+
+varSelectInput("y_var2", "Select an dependent variable:",
+               data = iris %>% select(-c(Species)),
+               selected = "Petal.Width")
+```
+
+```{r}
+#| panel: fill
+
+gt::gt_output("summary")
+```
+
+
+
+## 
+
+```{r}
+#| panel: input
+#| layout-ncol: 2
+
+inputPanel(
+  sliderInput("min_petal_width", 
+            "Select the smallest Petal Width to appear in the data.",
+            min = .09, max = 2.6, step = .01, value = .09),
+checkboxInput("show_color","Color Plot By Species?", value = FALSE)
+)
+```
+
+:::: panel-tabset
+
+## Plot
+
+```{r}
+#| panel: fill
+#| 
+plotOutput("scatterplot")
+
+```
+
+
+## table
+```{r}
+tableOutput("my_summaries")
+```
+
+::::
+
+```{r}
+#| context: server
+
+df <- reactiveValues(data = iris)
+  
+observeEvent(input$min_petal_width, {
+  df$data <- iris %>% filter(Petal.Width > input$min_petal_width)
+})
+
+# placeholder plot
+output$scatterplot <- renderPlot(
+  create_plot(df$data, input$show_color)
+)
+
+# placehold table
+output$my_summaries <- function(){
+  create_table(df$data)
+}
+```
+
+
+
+
+
+
+
+
+
